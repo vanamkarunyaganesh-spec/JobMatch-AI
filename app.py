@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Literal
 import httpx
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field, ValidationError
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -15,7 +15,7 @@ app = FastAPI(title='JobMatch AI')
 
 @app.get('/', include_in_schema=False)
 def home():
-    return RedirectResponse('/docs')
+    return FileResponse(Path(__file__).with_name('index.html'))
 
 def connect():
     db = sqlite3.connect(DB)

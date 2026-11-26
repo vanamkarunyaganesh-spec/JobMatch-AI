@@ -2,7 +2,7 @@ FROM python:3.12-slim
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY app.py jobs.json ./
+COPY app.py jobs.json index.html ./
 ENV JOBMATCH_DB=/data/jobmatch.db
 RUN mkdir /data
 EXPOSE 8000

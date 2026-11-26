@@ -29,3 +29,7 @@ def test_tool_call_contract(tmp_path,monkeypatch):
     c=TestClient(app.app)
     r=c.post('/chat',json={'user_id':'u1','question':'Find RAG jobs'}).json()
     assert r['mode']=='llm_tool_call' and r['jobs'][0]['id']=='j1'
+
+def test_home_page():
+    r=TestClient(app.app).get('/')
+    assert r.status_code==200 and 'JobMatch AI' in r.text

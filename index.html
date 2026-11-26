@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JobMatch AI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,sans-serif;background:#f4f6fb;color:#172033;line-height:1.5}
+main{max-width:640px;margin:0 auto;padding:32px 16px}
+h1{margin:0}
+form,.card{background:#fff;border:1px solid #dde2ee;border-radius:12px;padding:16px;margin-top:16px}
+label{display:block;font-weight:600;margin-bottom:12px}
+input,select,textarea{display:block;width:100%;margin-top:4px;padding:10px;font:inherit;border:1px solid #c5ccdc;border-radius:8px}
+button{width:100%;padding:12px;font:inherit;font-weight:600;color:#fff;background:#2f55d4;border:0;border-radius:8px;cursor:pointer}
+button:disabled{opacity:.6}
+small{color:#5b6478}
+#answer{white-space:pre-wrap}
+</style>
+</head>
+<body>
+<main>
+<h1>JobMatch AI</h1>
+<small>Demo with fictional sample jobs. Don't enter personal data.</small>
+<form id="form">
+<label>Your skills<input id="skills" maxlength="1000" placeholder="Python, FastAPI, RAG" required></label>
+<label>Location<select id="location"><option value="">Any</option><option>Hyderabad</option><option>Bengaluru</option></select></label>
+<label>Question<textarea id="question" maxlength="1000" rows="3" required>Find me an internship</textarea></label>
+<button id="go">Find jobs</button>
+</form>
+<p id="status" role="status"></p>
+<div class="card" id="reply" hidden><div id="answer"></div><small id="mode"></small></div>
+<div id="jobs"></div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const user = 'web-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+async function send(url, method, body) {
+  const r = await fetch(url, {method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
+  if (!r.ok) throw new Error('Request failed (' + r.status + ')');
+  return r.json();
+}
+function add(parent, tag, text) {
+  const el = document.createElement(tag);
+  el.textContent = text;
+  parent.appendChild(el);
+}
+$('form').onsubmit = async e => {
+  e.preventDefault();
+  $('go').disabled = true;
+  $('status').textContent = 'Searching...';
+  $('reply').hidden = true;
+  $('jobs').replaceChildren();
+  try {
+    await send('/profiles/' + user, 'PUT', {skills: $('skills').value, location: $('location').value});
+    const data = await send('/chat', 'POST', {user_id: user, question: $('question').value});
+    $('answer').textContent = data.answer;
+    $('mode').textContent = data.mode === 'llm_tool_call' ? 'Answered by the AI model' : 'Offline keyword matching';
+    $('reply').hidden = false;
+    for (const job of data.jobs) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      add(card, 'strong', job.title);
+      add(card, 'div', job.location + ' · ' + job.skills);
+      add(card, 'small', job.description);
+      $('jobs').appendChild(card);
+    }
+    $('status').textContent = data.jobs.length ? '' : 'No matching sample jobs.';
+  } catch (err) {
+    $('status').textContent = err.message + '. Please try again.';
+  } finally {
+    $('go').disabled = false;
+  }
+};
+</script>
+</body>
+</html>
