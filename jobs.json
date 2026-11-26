@@ -1,0 +1,7 @@
+[
+{"id":"j1","title":"GenAI Backend Intern","skills":"Python FastAPI LLM RAG embeddings SQL","description":"Build retrieval agents and backend APIs","location":"Hyderabad"},
+{"id":"j2","title":"Frontend Intern","skills":"React JavaScript CSS","description":"Build accessible web interfaces","location":"Hyderabad"},
+{"id":"j3","title":"Data Analyst Intern","skills":"SQL Excel Python Power BI","description":"Analyze business data and reporting","location":"Bengaluru"},
+{"id":"j4","title":"AI Search Engineer Intern","skills":"Python semantic search vector embeddings ranking LLM","description":"Build personalized job recommendations","location":"Bengaluru"},
+{"id":"j5","title":"Embedded Systems Intern","skills":"C Arduino electronics sensors","description":"Develop microcontroller firmware","location":"Hyderabad"}
+]
