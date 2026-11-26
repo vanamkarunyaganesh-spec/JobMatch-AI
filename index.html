@@ -21,10 +21,10 @@ small{color:#5b6478}
 <body>
 <main>
 <h1>JobMatch AI</h1>
-<small>Demo with fictional sample jobs. Don't enter personal data.</small>
+<small>India openings from selected company job boards. Check details on the company's posting. Don't enter personal data.</small>
 <form id="form">
 <label>Your skills<input id="skills" maxlength="1000" placeholder="Python, FastAPI, RAG" required></label>
-<label>Location<select id="location"><option value="">Any</option><option>Hyderabad</option><option>Bengaluru</option></select></label>
+<label>Location<select id="location"><option value="">Any</option><option>Hyderabad</option><option>Bengaluru</option><option>Pune</option><option>Gurugram</option><option>Remote</option></select></label>
 <label>Question<textarea id="question" maxlength="1000" rows="3" required>Find me an internship</textarea></label>
 <button id="go">Find jobs</button>
 </form>
@@ -40,6 +40,16 @@ async function send(url, method, body) {
   if (!r.ok) throw new Error('Request failed (' + r.status + ')');
   return r.json();
 }
+function link(parent, label, url) {
+  if (!url.startsWith('https://')) return;
+  const a = document.createElement('a');
+  a.textContent = label;
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.style.marginRight = '16px';
+  parent.appendChild(a);
+}
 function add(parent, tag, text) {
   const el = document.createElement(tag);
   el.textContent = text;
@@ -54,18 +64,25 @@ $('form').onsubmit = async e => {
   try {
     await send('/profiles/' + user, 'PUT', {skills: $('skills').value, location: $('location').value});
     const data = await send('/chat', 'POST', {user_id: user, question: $('question').value});
-    $('answer').textContent = data.answer;
+    $('answer').textContent = data.answer.replace(/\*\*/g, '');
     $('mode').textContent = data.mode === 'llm_tool_call' ? 'Answered by the AI model' : 'Offline keyword matching';
     $('reply').hidden = false;
     for (const job of data.jobs) {
       const card = document.createElement('div');
       card.className = 'card';
       add(card, 'strong', job.title);
-      add(card, 'div', job.location + ' · ' + job.skills);
-      add(card, 'small', job.description);
+      add(card, 'div', [job.company, job.location].filter(Boolean).join(' · '));
+      if (job.date) add(card, 'small', 'Listing date: ' + job.date);
+      add(card, 'div', job.description.length > 220 ? job.description.slice(0, 220) + '...' : job.description);
+      if (job.apply_url) {
+        const row = document.createElement('div');
+        link(row, 'Apply', job.apply_url);
+        link(row, 'View on Maps', 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(job.company + ' ' + job.location));
+        card.appendChild(row);
+      }
       $('jobs').appendChild(card);
     }
-    $('status').textContent = data.jobs.length ? '' : 'No matching sample jobs.';
+    $('status').textContent = data.jobs.length ? '' : 'No matching jobs. Try another city, or remove the word internship.';
   } catch (err) {
     $('status').textContent = err.message + '. Please try again.';
   } finally {

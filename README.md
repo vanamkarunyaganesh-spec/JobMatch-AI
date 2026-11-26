@@ -1,10 +1,13 @@
 # JobMatch AI
-Local prototype with sample job data, TF-IDF cosine ranking, FastAPI REST endpoints, SQLite profile and conversation history, and optional Groq tool calling. No live job feed or production deployment.
+FastAPI job matching app with a web page, TF-IDF ranking, SQLite profile and history, and optional Groq tool calling.
 
-1. `python -m venv .venv` then activate the environment.
-2. `pip install -r requirements.txt`
-3. `python -m pytest -q`
-4. `uvicorn app:app --reload` then open http://127.0.0.1:8000/docs.
-5. PUT `/profiles/demo` with skills and location, then POST `/chat` with user_id `demo` and question.
+Listings are India openings read from selected public Greenhouse and Lever company boards (see `live.py`), cached for one hour. `GET /sources` shows how many jobs each board returned. This is not a complete index of jobs.
 
-Optional live LLM: set GROQ_API_KEY and GROQ_MODEL (a supported tool-calling model). Never commit keys. Optional semantic embeddings: install `sentence-transformers` and set EMBEDDING_MODE=semantic; first run downloads the model. Default mode requires neither. The live LLM and semantic model paths require separate testing; tests use a mocked LLM response and the offline ranker. Dockerfile is provided but image has not been built here. This is a local single-user demo, not an authenticated production service. Sample listings are fictional.
+## Run
+1. `pip install -r requirements.txt`
+2. `python -m pytest -q`
+3. `uvicorn app:app --reload`, then open http://127.0.0.1:8000
+
+Set `GROQ_API_KEY` and `GROQ_MODEL` for AI answers. Never commit keys. Set `JOBS_SOURCE=sample` to use the fictional data in `jobs.json`.
+
+Demo only: no login, and saved data is not durable on free hosting.
